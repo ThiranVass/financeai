@@ -994,7 +994,8 @@ async function fbDel(col,id){
 // ── AUTH ──
 function signInWithGoogle(){
   const errEl=el('auth-error');if(errEl)errEl.style.display='none';
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+  // Use redirect instead of popup - works on all browsers without popup blocker issues
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider())
     .catch(e=>{if(errEl){errEl.textContent=e.message;errEl.style.display='';}});
 }
 
@@ -1005,6 +1006,18 @@ function doSignOut(){
 }
 
 // ── AUTH STATE ──
+// Handle redirect result first (from signInWithRedirect)
+auth.getRedirectResult().then(result => {
+  // Result handled by onAuthStateChanged below
+}).catch(e => {
+  console.error('Redirect error:', e);
+  const errEl = document.getElementById('auth-error');
+  if(errEl && e.code !== 'auth/no-current-user') {
+    errEl.textContent = e.message;
+    errEl.style.display = '';
+  }
+});
+
 auth.onAuthStateChanged(user=>{
   const authScr=el('auth-screen'),appEl=el('app');
   if(user){
