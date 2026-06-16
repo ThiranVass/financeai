@@ -326,7 +326,7 @@ nav { -webkit-overflow-scrolling: touch; }
     <div class="sb-logo-mark"><i class="ti ti-chart-dots"></i></div>
     <div>
       <div class="sb-brand">FinanceAI</div>
-      <div class="sb-version">v14 · LKR</div>
+      <div class="sb-version">v15 · LKR</div>
     </div>
   </div>
 
@@ -546,78 +546,54 @@ nav { -webkit-overflow-scrolling: touch; }
   <!-- ════ IMPORT ════ -->
   <div class="page" id="pg-import">
 
-    <!-- METHOD TABS -->
-    <div style="display:flex;gap:8px">
-      <button id="itab-csv" onclick="switchITab('csv')" class="btn-primary" style="font-size:12px"><i class="ti ti-file-spreadsheet"></i> Upload bank CSV</button>
+    <!-- ── IMPORT METHOD TABS ── -->
+    <div style="display:flex;gap:8px;margin-bottom:0">
+      <button id="itab-csv" onclick="switchITab('csv')" class="btn-primary" style="font-size:12px"><i class="ti ti-file-spreadsheet"></i> Upload CSV</button>
       <button id="itab-ai"  onclick="switchITab('ai')"  class="btn-ghost"    style="font-size:12px"><i class="ti ti-sparkles"></i> AI text paste</button>
-      <button id="itab-man" onclick="switchITab('man')" class="btn-ghost"    style="font-size:12px"><i class="ti ti-keyboard"></i> Manual entry</button>
+      <button id="itab-man" onclick="switchITab('man')" class="btn-ghost"    style="font-size:12px"><i class="ti ti-plus"></i> Add single</button>
     </div>
 
     <!-- ── CSV UPLOAD ── -->
     <div id="imp-csv">
       <div class="panel">
-        <div class="panel-head">
-          <span class="panel-title"><i class="ti ti-file-spreadsheet" style="color:var(--green);margin-right:6px"></i>Bank CSV import</span>
-          <span class="panel-sub">Commercial Bank, HNB, Sampath, BOC, NDB</span>
-        </div>
-        <div style="background:var(--green2);border:1px solid rgba(16,185,129,.2);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px">
-          <strong style="color:var(--green)">How to get your CSV:</strong> ComBank Online → Accounts → Transaction History → choose date range → Download/Export as CSV. Then drag it below.
-        </div>
+        <div class="panel-head"><span class="panel-title"><i class="ti ti-file-spreadsheet" style="color:var(--green);margin-right:6px"></i>Upload bank statement CSV</span></div>
         <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
-          <div class="form-group">
-            <label class="form-label">Default month (auto-detected from dates)</label>
+          <div class="form-group"><label class="form-label">Default month</label>
             <select id="csvMonth"><option>January 2026</option><option>February 2026</option><option>March 2026</option><option>April 2026</option><option>May 2026</option><option selected>June 2026</option><option>July 2026</option><option>August 2026</option><option>September 2026</option><option>October 2026</option><option>November 2026</option><option>December 2026</option></select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Bank format</label>
-            <select id="csvBank">
-              <option value="combank">Commercial Bank of Ceylon</option>
-              <option value="hnb">HNB</option>
-              <option value="sampath">Sampath Bank</option>
-              <option value="boc">Bank of Ceylon</option>
-              <option value="generic">Generic (Date, Desc, Debit, Credit)</option>
-            </select>
+          <div class="form-group"><label class="form-label">Bank</label>
+            <select id="csvBank"><option value="combank">Commercial Bank</option><option value="hnb">HNB</option><option value="sampath">Sampath</option><option value="boc">BOC</option></select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Skip transactions below (LKR)</label>
-            <input type="number" id="csvMin" value="0" placeholder="0" style="font-size:12px">
+          <div class="form-group"><label class="form-label">Skip below (LKR)</label>
+            <input type="number" id="csvMin" value="0" placeholder="0">
           </div>
         </div>
-
-        <!-- DROP ZONE -->
-        <div id="csvDrop"
-          onclick="document.getElementById('csvFile').click()"
-          ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='rgba(99,102,241,.12)'"
-          ondragleave="this.style.borderColor='rgba(99,102,241,.25)';this.style.background='var(--accent4)'"
-          ondrop="event.preventDefault();this.style.borderColor='rgba(99,102,241,.25)';this.style.background='var(--accent4)';handleCSVDrop(event)"
-          style="border:2.5px dashed rgba(99,102,241,.25);border-radius:var(--r2);padding:44px 20px;text-align:center;cursor:pointer;background:var(--accent4);transition:all .2s;margin-bottom:12px">
-          <i class="ti ti-cloud-upload" style="font-size:40px;color:var(--accent2);display:block;margin-bottom:10px"></i>
-          <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px">Drag &amp; drop your CSV file here</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:16px">or click to browse your files</div>
-          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;padding:8px 18px;border-radius:var(--r);font-size:12.5px;font-weight:500">
-            <i class="ti ti-folder-open"></i> Choose CSV file
-          </div>
+        <div id="csvDrop" onclick="document.getElementById('csvFile').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+          ondragleave="this.style.borderColor='rgba(99,102,241,.25)'"
+          ondrop="event.preventDefault();this.style.borderColor='rgba(99,102,241,.25)';handleCSVDrop(event)"
+          style="border:2px dashed rgba(99,102,241,.25);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;background:var(--accent4);transition:border-color .2s">
+          <i class="ti ti-cloud-upload" style="font-size:36px;color:var(--accent2);display:block;margin-bottom:10px"></i>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Drop your CSV file here or click to browse</div>
+          <div style="font-size:12px;color:var(--text3)">Commercial Bank, HNB, Sampath, BOC supported</div>
           <input type="file" id="csvFile" accept=".csv,.txt" style="display:none" onchange="handleCSVFile(this)">
         </div>
-        <div id="csvStatus"></div>
+        <div id="csvStatus" style="margin-top:8px"></div>
       </div>
     </div>
 
     <!-- ── AI TEXT ── -->
     <div id="imp-ai" style="display:none">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title"><i class="ti ti-sparkles" style="color:var(--accent2);margin-right:6px"></i>AI text parser</span><span class="panel-sub">Requires Gemini API key in Settings</span></div>
-        <div style="background:var(--accent4);border:1px solid rgba(99,102,241,.15);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
-          Paste any statement text — copied from PDF, SMS, email. Gemini AI will read it and auto-categorise everything.
-        </div>
-        <div class="form-row" style="grid-template-columns:1fr 1fr">
+        <div class="panel-head"><span class="panel-title"><i class="ti ti-sparkles" style="color:var(--accent2);margin-right:6px"></i>AI text parser</span></div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
           <div class="form-group"><label class="form-label">Month</label>
             <select id="impMonth"><option>January 2026</option><option>February 2026</option><option>March 2026</option><option>April 2026</option><option>May 2026</option><option selected>June 2026</option><option>July 2026</option><option>August 2026</option><option>September 2026</option><option>October 2026</option><option>November 2026</option><option>December 2026</option></select>
           </div>
-          <div class="form-group"><label class="form-label">Currency</label><select id="impCurrency"><option>LKR</option><option>USD</option><option>EUR</option><option>GBP</option></select></div>
+          <div class="form-group"><label class="form-label">Currency</label><select id="impCurrency"><option>LKR</option><option>USD</option></select></div>
         </div>
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Paste statement text</label>
-          <textarea id="stmtText" style="min-height:130px" placeholder="Paste copied text from your bank statement PDF or email here..."></textarea>
+        <div class="form-group" style="margin-bottom:12px"><label class="form-label">Paste statement text</label>
+          <textarea id="stmtText" style="min-height:120px" placeholder="Paste copied text from your bank statement PDF or email…"></textarea>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
           <button class="btn-primary" id="parseBtn" onclick="parseStatement()"><i class="ti ti-sparkles"></i> Parse with Gemini</button>
@@ -629,74 +605,75 @@ nav { -webkit-overflow-scrolling: touch; }
     <!-- ── MANUAL ── -->
     <div id="imp-man" style="display:none">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title"><i class="ti ti-keyboard" style="color:var(--amber);margin-right:6px"></i>Add single transaction</span></div>
+        <div class="panel-head"><span class="panel-title"><i class="ti ti-plus" style="color:var(--amber);margin-right:6px"></i>Add single transaction</span></div>
         <div class="form-row" style="grid-template-columns:1fr 1fr">
           <div class="form-group"><label class="form-label">Date</label><input type="date" id="mt-date"></div>
           <div class="form-group"><label class="form-label">Month</label><select id="mt-month"><option>January 2026</option><option>February 2026</option><option>March 2026</option><option>April 2026</option><option>May 2026</option><option selected>June 2026</option><option>July 2026</option><option>August 2026</option><option>September 2026</option><option>October 2026</option><option>November 2026</option><option>December 2026</option></select></div>
         </div>
-        <div class="form-group" style="margin-bottom:10px"><label class="form-label">Description</label><input type="text" id="mt-desc" placeholder="e.g. Keells Supermarket"></div>
+        <div class="form-group" style="margin-bottom:8px"><label class="form-label">Description</label><input type="text" id="mt-desc" placeholder="e.g. Keells Supermarket"></div>
         <div class="form-row" style="grid-template-columns:1fr 1fr">
           <div class="form-group"><label class="form-label">Amount (LKR)</label><input type="number" id="mt-amount" placeholder="0"></div>
           <div class="form-group"><label class="form-label">Type</label><select id="mt-type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
         </div>
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Category</label>
-          <select id="mt-cat"><option>Bills</option><option>Subscriptions</option><option>Entertainment</option><option>Food &amp; Drink</option><option>Groceries</option><option>Health &amp; Wellbeing</option><option>Other</option><option>Shopping</option><option>Fuel</option><option>Travel</option><option>Love life</option><option>Gifts</option></select>
+        <div class="form-group" style="margin-bottom:12px"><label class="form-label">Category</label>
+          <select id="mt-cat"><option>Bills</option><option>Subscriptions</option><option>Entertainment</option><option>Food & Drink</option><option>Groceries</option><option>Health & Wellbeing</option><option>Other</option><option>Shopping</option><option>Fuel</option><option>Travel</option><option>Love life</option><option>Gifts</option></select>
         </div>
         <button class="btn-primary" onclick="saveManualTxn()"><i class="ti ti-check"></i> Add transaction</button>
       </div>
     </div>
 
-    <!-- ── REVIEW TABLE (shared) ── -->
+    <!-- ══════════════════════════════════════════
+         LEDGER — shown after CSV/AI parse
+    ══════════════════════════════════════════ -->
     <div id="parsedSection" style="display:none">
-      <div class="panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div class="panel" style="padding:0;overflow:hidden">
+
+        <!-- Ledger header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px">
           <div>
-            <div style="font-size:14px;font-weight:600;color:var(--text)">Review &amp; categorise <span id="parsedCount" style="font-size:12px;font-weight:400;color:var(--text3)"></span></div>
-            <div style="font-size:11.5px;color:var(--text3);margin-top:2px">Edit type or category, then save all to cloud.</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Statement ledger <span id="parsedCount" style="font-size:12px;font-weight:400;color:var(--text3)"></span></div>
+            <div style="font-size:11.5px;color:var(--text3);margin-top:2px">Review each row. Change category or type if needed. Then save.</div>
           </div>
-          <button class="btn-primary" onclick="confirmImport()" style="font-size:13px;padding:10px 22px">
+          <button class="btn-primary" onclick="confirmImport()" style="font-size:13px;padding:10px 24px;gap:8px">
             <i class="ti ti-cloud-upload"></i> Save all to cloud
           </button>
         </div>
 
-        <!-- Filter + Search -->
-        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-          <button onclick="filterParsed('all')"     id="pf-all" class="_pf-btn" style="padding:5px 14px;border-radius:6px;border:1px solid var(--accent);background:var(--accent3);color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit">All</button>
-          <button onclick="filterParsed('income')"  id="pf-inc" class="_pf-btn" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit">Income</button>
-          <button onclick="filterParsed('expense')" id="pf-exp" class="_pf-btn" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit">Expenses</button>
-          <button onclick="filterParsed('review')"  id="pf-rev" class="_pf-btn" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit">Needs review</button>
-          <input type="text" id="parsedSearch" oninput="renderParsedRows()" placeholder="Search descriptions…" style="padding:5px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);margin-left:auto;width:180px;outline:none">
+        <!-- Filter bar -->
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--bg3);flex-wrap:wrap">
+          <div style="display:flex;gap:4px">
+            <button onclick="filterParsed('all')"     id="pf-all" style="padding:4px 12px;border-radius:5px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-size:11.5px;cursor:pointer;font-family:inherit">All</button>
+            <button onclick="filterParsed('income')"  id="pf-inc" style="padding:4px 12px;border-radius:5px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:11.5px;cursor:pointer;font-family:inherit">Income</button>
+            <button onclick="filterParsed('expense')" id="pf-exp" style="padding:4px 12px;border-radius:5px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:11.5px;cursor:pointer;font-family:inherit">Expenses</button>
+            <button onclick="filterParsed('review')"  id="pf-rev" style="padding:4px 12px;border-radius:5px;border:1px solid var(--border2);background:none;color:var(--text2);font-size:11.5px;cursor:pointer;font-family:inherit">Needs review</button>
+          </div>
+          <input type="text" id="parsedSearch" oninput="renderParsedRows()" placeholder="Search…" style="padding:4px 10px;font-size:11.5px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);width:160px;outline:none;margin-left:auto">
+          <select id="bulkCat" style="font-size:11.5px;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text)"><option value="">Bulk category…</option></select>
+          <select id="bulkType" style="font-size:11.5px;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text)"><option value="">Bulk type…</option><option value="expense">Expense</option><option value="income">Income</option></select>
+          <button onclick="applyBulk()" style="font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit"><i class="ti ti-check"></i></button>
+          <button onclick="deleteChecked()" style="font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid rgba(244,63,94,.3);background:none;color:var(--red);cursor:pointer;font-family:inherit"><i class="ti ti-trash"></i></button>
         </div>
 
-        <!-- Bulk actions -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;padding:8px 10px;background:var(--bg3);border-radius:8px">
-          <span style="font-size:11px;color:var(--text3)">Bulk edit checked:</span>
-          <select id="bulkCat" style="font-size:11.5px;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);flex:1;min-width:120px"><option value="">Set category…</option></select>
-          <select id="bulkType" style="font-size:11.5px;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text)"><option value="">Set type…</option><option value="expense">Expense</option><option value="income">Income</option></select>
-          <button onclick="applyBulk()" style="font-size:11.5px;padding:4px 12px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit"><i class="ti ti-check"></i> Apply</button>
-          <button onclick="deleteChecked()" style="font-size:11.5px;padding:4px 12px;border-radius:5px;border:1px solid rgba(244,63,94,.3);background:none;color:var(--red);cursor:pointer;font-family:inherit"><i class="ti ti-trash"></i> Delete</button>
-        </div>
-
-        <!-- Column headers -->
-        <div style="display:grid;grid-template-columns:28px 90px 1fr 100px 150px 28px;gap:6px;padding:6px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <!-- Ledger column headers -->
+        <div style="display:grid;grid-template-columns:36px 100px 1fr 130px 160px 80px 36px;gap:0;padding:8px 18px;background:var(--bg3);border-bottom:1px solid var(--border)">
           <div><input type="checkbox" id="chkAll" onchange="toggleAll(this)" style="cursor:pointer"></div>
-          <div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.06em">DATE</div>
-          <div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.06em">DESCRIPTION</div>
-          <div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.06em">AMOUNT &amp; TYPE</div>
-          <div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.06em">CATEGORY</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Date</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Description</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;text-align:right">Amount</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Category</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Type</div>
           <div></div>
         </div>
 
-        <!-- Transaction rows (CSS Grid, no table) -->
-        <div id="parsedBody" style="max-height:60vh;overflow-y:auto"></div>
+        <!-- Ledger rows -->
+        <div id="parsedBody" style="max-height:55vh;overflow-y:auto"></div>
 
-        <!-- Totals -->
-        <div id="parsedTotals" style="display:flex;justify-content:flex-end;gap:20px;padding:10px 4px 0;font-size:12.5px;border-top:1px solid var(--border);margin-top:8px;flex-wrap:wrap"></div>
+        <!-- Totals footer -->
+        <div id="parsedTotals" style="display:flex;justify-content:flex-end;gap:24px;padding:12px 18px;border-top:1px solid var(--border);background:var(--bg3);font-size:12.5px;font-weight:500"></div>
       </div>
     </div>
 
   </div>
-
   <!-- ════ CREDIT CARDS ════ -->
   <div class="page" id="pg-cards">
     <div style="display:flex;gap:10px">
@@ -1671,109 +1648,109 @@ let parsedFilterMode = 'all';
 
 function renderParsedRows() {
   window._parsedRows = parsedRows;
-  const search = (document.getElementById('parsedSearch')?.value || '').toLowerCase();
+  const srch = (document.getElementById('parsedSearch')?.value || '').toLowerCase();
   let rows = [...parsedRows];
   if (parsedFilterMode === 'income')  rows = rows.filter(r => r.type === 'income');
   if (parsedFilterMode === 'expense') rows = rows.filter(r => r.type === 'expense');
   if (parsedFilterMode === 'review')  rows = rows.filter(r => r.cat === 'Other');
-  if (search) rows = rows.filter(r =>
-    (r.desc||'').toLowerCase().includes(search) ||
-    (r.rawDesc||'').toLowerCase().includes(search)
+  if (srch) rows = rows.filter(r =>
+    (r.desc||'').toLowerCase().includes(srch) ||
+    (r.rawDesc||'').toLowerCase().includes(srch)
   );
 
-  const countEl = document.getElementById('parsedCount');
-  if (countEl) countEl.textContent = '(' + parsedRows.length + ' total, ' + rows.length + ' shown)';
+  // Update count
+  const ct = document.getElementById('parsedCount');
+  if (ct) ct.textContent = '(' + parsedRows.length + ' total, ' + rows.length + ' shown)';
 
-  // Populate bulk category dropdown
+  // Populate bulk cat dropdown once
   const bc = document.getElementById('bulkCat');
   if (bc && bc.options.length <= 1) {
-    getAllCats().forEach(c => { const o = document.createElement('option'); o.value = c; o.text = c; bc.appendChild(o); });
+    getAllCats().forEach(c => { const o=document.createElement('option');o.value=c;o.text=c;bc.appendChild(o); });
   }
 
   const body = document.getElementById('parsedBody');
   if (!body) return;
 
   if (!rows.length) {
-    body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">No transactions match the filter</div>';
+    body.innerHTML = '<div style="padding:32px;text-align:center;color:#4F5068;font-size:13px">No transactions match the current filter</div>';
     refreshPTotals(); return;
   }
 
   const allCats = getAllCats();
-  const html_parts = [];
+  // Grid: 36px | 100px | 1fr | 130px | 160px | 80px | 36px
+  const GRID = 'display:grid;grid-template-columns:36px 100px 1fr 130px 160px 80px 36px;gap:0;align-items:center;padding:9px 18px;border-bottom:1px solid rgba(255,255,255,.05)';
 
+  let out = '';
   for (let vi = 0; vi < rows.length; vi++) {
-    const r = rows[vi];
+    const r   = rows[vi];
     const idx = parsedRows.indexOf(r);
     if (idx < 0) continue;
 
-    const isInc   = (r.type === 'income');
-    const amtColor = isInc ? '#10B981' : '#F43F5E';
-    const rowBg    = r.checked ? 'rgba(99,102,241,.1)' : (vi % 2 === 0 ? '#16171E' : '#1C1D27');
+    const isInc  = r.type === 'income';
+    const clr    = isInc ? '#10B981' : '#F43F5E';
+    const rowBg  = r.checked ? '#1e1f32' : (vi % 2 === 0 ? '#16171E' : '#1a1b24');
 
-    // Date display: YYYY-MM-DD → DD/MM/YY
+    // Date: YYYY-MM-DD → DD MMM
     let dd = r.date || '';
     if (/^\d{4}-\d{2}-\d{2}$/.test(dd)) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const p = dd.split('-');
-      dd = p[2] + '/' + p[1] + '/' + p[0].slice(2);
+      dd = p[2] + ' ' + months[parseInt(p[1])-1];
     }
 
-    // Description: use desc, fallback to rawDesc
-    const desc = (r.desc && r.desc.length > 0) ? r.desc : (r.rawDesc || '');
-    const sub  = (r.rawDesc && r.rawDesc !== r.desc) ? r.rawDesc.slice(0, 45) : '';
+    // Clean description with guaranteed fallback
+    const desc = r.desc && r.desc.trim() ? r.desc.trim()
+               : r.rawDesc && r.rawDesc.trim() ? r.rawDesc.trim()
+               : 'Unknown';
+
+    // Raw sub-description
+    const sub = (r.rawDesc && r.rawDesc !== r.desc) ? r.rawDesc.trim().slice(0,50) : '';
+
+    // Amount formatted
+    const amt = (isInc ? '+' : '−') + ' LKR ' + Math.round(r.amount).toLocaleString('en-LK');
 
     // Category select
-    const catSelect = '<select onchange="handleCatChange(this,' + idx + ')" '
-      + 'style="width:100%;font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border2);background:var(--bg3);color:#F0F1F7;cursor:pointer">'
-      + allCats.map(c => '<option value="' + c + '"' + (c === r.cat ? ' selected' : '') + '>' + c + '</option>').join('')
-      + '<option value="__new__">+ New…</option>'
-      + '</select>';
+    const catOpts = allCats.map(c =>
+      `<option value="${c}"${c===r.cat?' selected':''}>${c}</option>`
+    ).join('') + '<option value="__new__">+ New…</option>';
 
-    // Type select
-    const typeSelect = '<select onchange="parsedRows[' + idx + '].type=this.value;renderParsedRows()" '
-      + 'style="width:100%;font-size:11px;padding:3px 4px;border-radius:5px;border:1px solid var(--border2);background:' + (isInc ? 'rgba(16,185,129,.12)' : 'rgba(244,63,94,.1)') + ';color:' + amtColor + ';cursor:pointer;font-weight:500">'
-      + '<option value="expense"' + (!isInc ? ' selected' : '') + '>Expense</option>'
-      + '<option value="income"' + (isInc ? ' selected' : '') + '>Income</option>'
-      + '</select>';
+    out += `<div style="${GRID};background:${rowBg}">` +
 
-    html_parts.push(
-      '<div style="display:grid;grid-template-columns:28px 90px 1fr 100px 150px 28px;gap:6px;align-items:center;padding:7px 8px;background:' + rowBg + ';border-bottom:1px solid rgba(255,255,255,.04)">'
+      // Checkbox
+      `<div><input type="checkbox"${r.checked?' checked':''} onchange="parsedRows[${idx}].checked=this.checked;syncAllChk()" style="cursor:pointer;accent-color:#6366F1"></div>` +
 
-      // Col 1: Checkbox
-      + '<div><input type="checkbox"' + (r.checked ? ' checked' : '') + ' onchange="parsedRows[' + idx + '].checked=this.checked;syncAllChk()" style="cursor:pointer"></div>'
+      // Date
+      `<div style="font-size:11.5px;color:#9394A5;font-family:var(--font-mono)">${dd}</div>` +
 
-      // Col 2: Date
-      + '<div style="font-size:11px;color:#9394A5;line-height:1.3">' + dd + '</div>'
+      // Description — the key column
+      `<div style="padding-right:12px;min-width:0">` +
+        `<div style="font-size:13px;font-weight:600;color:#F0F1F7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</div>` +
+        (sub ? `<div style="font-size:10.5px;color:#4F5068;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">${sub}</div>` : '') +
+      `</div>` +
 
-      // Col 3: Description (THIS IS THE KEY COLUMN)
-      + '<div style="min-width:0">'
-      +   '<div style="font-size:13px;font-weight:600;color:#F0F1F7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (desc || '—') + '</div>'
-      +   (sub ? '<div style="font-size:10px;color:#4F5068;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px">' + sub + '</div>' : '')
-      + '</div>'
+      // Amount
+      `<div style="font-size:13px;font-weight:700;color:${clr};font-family:var(--font-mono);text-align:right;padding-right:8px">${amt}</div>` +
 
-      // Col 4: Amount + Type
-      + '<div>'
-      +   '<div style="font-size:13px;font-weight:700;color:' + amtColor + ';margin-bottom:3px">'
-      +     (isInc ? '+' : '−') + 'LKR ' + Math.round(r.amount).toLocaleString('en-LK')
-      +   '</div>'
-      +   typeSelect
-      + '</div>'
+      // Category
+      `<div><select onchange="handleCatChange(this,${idx})" style="width:100%;font-size:11.5px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:#22232F;color:#F0F1F7;cursor:pointer">${catOpts}</select></div>` +
 
-      // Col 5: Category
-      + '<div>' + catSelect + '</div>'
+      // Type
+      `<div><select onchange="parsedRows[${idx}].type=this.value;renderParsedRows()" style="width:100%;font-size:11.5px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:${isInc?'rgba(16,185,129,.15)':'rgba(244,63,94,.12)'};color:${clr};cursor:pointer;font-weight:600">` +
+        `<option value="expense"${!isInc?' selected':''}>Expense</option>` +
+        `<option value="income"${isInc?' selected':''}>Income</option>` +
+      `</select></div>` +
 
-      // Col 6: Delete
-      + '<div><button onclick="parsedRows.splice(' + idx + ',1);renderParsedRows()" '
-      +   'style="background:none;border:none;color:#F43F5E;cursor:pointer;font-size:14px;padding:2px 4px;line-height:1">'
-      +   '×</button></div>'
+      // Delete
+      `<div style="text-align:center"><button onclick="parsedRows.splice(${idx},1);renderParsedRows()" style="background:none;border:none;color:#4F5068;cursor:pointer;font-size:16px;line-height:1;padding:2px 6px" onmouseover="this.style.color='#F43F5E'" onmouseout="this.style.color='#4F5068'">×</button></div>` +
 
-      + '</div>'
-    );
+    `</div>`;
   }
 
-  body.innerHTML = html_parts.join('');
+  body.innerHTML = out;
   syncAllChk();
   refreshPTotals();
 }
+
 
 window.handleCatChange = function(sel, idx) {
   if (sel.value === '__new__') {
