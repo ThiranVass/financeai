@@ -326,7 +326,7 @@ nav { -webkit-overflow-scrolling: touch; }
     <div class="sb-logo-mark"><i class="ti ti-chart-dots"></i></div>
     <div>
       <div class="sb-brand">FinanceAI</div>
-      <div class="sb-version">v9 · FINAL · LKR</div>
+      <div class="sb-version">v10 · LKR</div>
     </div>
   </div>
 
@@ -1668,6 +1668,9 @@ function showStatus(id, html, type) {
 let parsedFilterMode = 'all';
 
 function renderParsedRows() {
+  window._parsedRows = parsedRows; // expose for debugging
+  console.log('renderParsedRows called, rows:', parsedRows.length);
+  if(parsedRows.length > 0) console.log('First row:', JSON.stringify(parsedRows[0]));
   const search = (document.getElementById('parsedSearch')?.value || '').toLowerCase();
   let rows = parsedRows.filter(r => {
     if (parsedFilterMode === 'income')  return r.type === 'income';
