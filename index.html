@@ -1254,6 +1254,375 @@ window.saveManualTxn=async function(){
 // ══════════════════════════════════════════════════════
 //  AI IMPORT — Parses statement, saves to cloud
 // ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+//  IMPORT SYSTEM — CSV + AI + Manual
+// ══════════════════════════════════════════════════════
+
+// Import tab switcher
+window.switchImportTab = function(tab) {
+  document.getElementById('import-csv').style.display = tab==='csv' ? '' : 'none';
+  document.getElementById('import-ai').style.display = tab==='ai' ? '' : 'none';
+  document.getElementById('import-manual').style.display = tab==='manual' ? '' : 'none';
+  ['csv','ai','manual'].forEach(t => {
+    const btn = document.getElementById('tab-'+t);
+    if(btn) {
+      btn.className = t===tab ? 'btn-primary' : 'btn-ghost';
+    }
+  });
+};
+
+// ── CSV IMPORT ──
+window.handleCSVDrop = function(event) {
+  event.preventDefault();
+  document.getElementById('csvDropZone').style.borderColor = 'rgba(99,102,241,.3)';
+  const file = event.dataTransfer.files[0];
+  if(file) processCSVFile(file);
+};
+
+window.handleCSVFile = function(input) {
+  const file = input.files[0];
+  if(file) processCSVFile(file);
+};
+
+function processCSVFile(file) {
+  const reader = new FileReader();
+  const month = document.getElementById('csvMonth').value;
+  const format = document.getElementById('csvBankFormat').value;
+  const minAmt = parseFloat(document.getElementById('csvMinAmount').value) || 0;
+  
+  showInlineToast('csvToast', 'Reading file: ' + file.name + '…', 'info');
+  
+  reader.onload = function(e) {
+    const text = e.target.result;
+    try {
+      const transactions = parseCSV(text, format, month, minAmt);
+      if(transactions.length === 0) {
+        showInlineToast('csvToast', 'No transactions found. Make sure this is a valid bank statement CSV.', 'err');
+        return;
+      }
+      parsedRows = transactions;
+      renderParsedRows();
+      document.getElementById('parsedSection').style.display = '';
+      showInlineToast('csvToast', '✓ Found ' + transactions.length + ' transactions — review and save below', 'ok');
+      // Scroll to review section
+      setTimeout(() => document.getElementById('parsedSection').scrollIntoView({behavior:'smooth'}), 200);
+    } catch(err) {
+      showInlineToast('csvToast', 'Error reading file: ' + err.message, 'err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── SMART CATEGORISER ──
+function smartCategorise(desc) {
+  const d = desc.toLowerCase();
+  
+  // Income signals
+  if(d.includes('salary') || d.includes('tomorrow advertising') || d.includes('june salary') || 
+     d.includes('advance income tx credit') || d.includes('interest') || d.includes('wepay') ||
+     (d.includes('payment') && !d.includes('purchase'))) {
+    return {type:'income', cat:'Other'};
+  }
+  
+  // Grocery stores
+  if(d.match(/keells|cargills|arpico|spar|meegamu|village bakery|perera stores|brescia mart|c s l holdings/)) {
+    return {type:'expense', cat:'Groceries'};
+  }
+  // Food & drink / restaurants
+  if(d.match(/uber eats|barista|food|prego|dinemore|softlogic resta|sun food|restaurant|koko|simply strawberries|mr\.deen/)) {
+    return {type:'expense', cat:'Food & Drink'};
+  }
+  // Subscriptions / digital
+  if(d.match(/apple\.com|dialog axiata|netflix|spotify|music pay/)) {
+    return {type:'expense', cat:'Subscriptions'};
+  }
+  // Travel / transport
+  if(d.match(/pickme|uber|airline|hotel|topaz|negombo hotel|night stay|mikayla cove|woodnest/)) {
+    return {type:'expense', cat:'Travel'};
+  }
+  // Fuel
+  if(d.match(/fuel|laugfs|marine fuel|filling|petrol/)) {
+    return {type:'expense', cat:'Fuel'};
+  }
+  // Health
+  if(d.match(/pharmacy|medical|hospital|clinic|lakshi pharmacy/)) {
+    return {type:'expense', cat:'Health & Wellbeing'};
+  }
+  // Shopping / clothing
+  if(d.match(/salon|wine|bombuwala|softlogic/)) {
+    return {type:'expense', cat:'Shopping'};
+  }
+  // Bills / utilities
+  if(d.match(/bill|electricity|water|slt|lanka bell|ceb/)) {
+    return {type:'expense', cat:'Bills'};
+  }
+  // Love life
+  if(d.match(/flower|piumika|rashmi piu|toy store|gift/)) {
+    return {type:'expense', cat:'Love life'};
+  }
+  // ATM / Withdrawals
+  if(d.match(/withdrawal|atm/)) {
+    return {type:'expense', cat:'Other'};
+  }
+  // Bank charges
+  if(d.match(/ib ceft chgs|debit interest|advance income tax|traffic/)) {
+    return {type:'expense', cat:'Bills'};
+  }
+  // VMT Credit / refunds
+  if(d.includes('vmt credit')) {
+    return {type:'income', cat:'Other'};
+  }
+  // Credits / transfers in
+  if(d.includes('061100') || d.includes('bene/org')) {
+    return {type:'income', cat:'Other'};
+  }
+  
+  return {type:'expense', cat:'Other'};
+}
+
+// ── CSV PARSER — Handles ComBank and other formats ──
+function parseCSV(text, format, month, minAmt) {
+  const lines = text.split('\n');
+  const transactions = [];
+  let inData = false;
+  
+  for(let i = 0; i < lines.length; i++) {
+    const raw = lines[i].trim();
+    if(!raw) continue;
+    
+    // Parse as proper CSV (handles quoted commas)
+    const row = parseCSVRow(raw);
+    
+    if(format === 'combank' || format === 'generic') {
+      // ComBank format: ,Date,,Description,,Currency,Debit,Credit,Balance,,,
+      // Detect header row
+      if(row[1] === 'Transaction Date' || raw.includes('Transaction Date')) { inData = true; continue; }
+      if(!inData && row.length >= 8 && isDate(row[1])) inData = true;
+      if(!inData) continue;
+      
+      const date = row[1]?.trim();
+      const desc = row[3]?.trim();
+      const debitStr = (row[6] || '').trim().replace(/,/g, '');
+      const creditStr = (row[7] || '').trim().replace(/,/g, '');
+      
+      if(!date || !desc || !isDate(date)) continue;
+      if(desc.toLowerCase().includes('generated at')) break;
+      
+      const debit = parseFloat(debitStr) || 0;
+      const credit = parseFloat(creditStr) || 0;
+      
+      if(debit === 0 && credit === 0) continue;
+      
+      const amount = credit > 0 ? credit : debit;
+      if(amount < minAmt) continue;
+      
+      // Clean description — remove transaction reference numbers
+      const cleanDesc = cleanDescription(desc);
+      const autoType = credit > 0 ? 'income' : 'expense';
+      const guess = smartCategorise(cleanDesc);
+      // Override type based on credit/debit column - this is definitive
+      const finalType = credit > 0 ? 'income' : 'expense';
+      // But use smart categoriser for category
+      const finalCat = guess.cat;
+      
+      transactions.push({
+        id: uid(),
+        date: formatDate(date),
+        desc: cleanDesc,
+        rawDesc: desc,
+        amount: amount,
+        type: finalType,
+        cat: finalCat,
+        month: month,
+        selected: false
+      });
+    }
+  }
+  
+  return transactions;
+}
+
+function parseCSVRow(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for(let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if(ch === '"') { inQuotes = !inQuotes; }
+    else if(ch === ',' && !inQuotes) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+function isDate(str) {
+  return str && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(str.trim());
+}
+
+function formatDate(dateStr) {
+  // Convert DD/MM/YYYY to YYYY-MM-DD for input[type=date]
+  const parts = dateStr.trim().split('/');
+  if(parts.length === 3) {
+    const day = parts[0].padStart(2,'0');
+    const mon = parts[1].padStart(2,'0');
+    const yr = parts[2].length === 2 ? '20'+parts[2] : parts[2];
+    return yr+'-'+mon+'-'+day;
+  }
+  return dateStr;
+}
+
+function cleanDescription(desc) {
+  // Remove bank reference numbers like "/ 029820043861 / -" and "/ O600039779142"
+  return desc
+    .replace(/PURCHASE /gi, '')
+    .replace(/\s*\/\s*[A-Z0-9]{9,}\/?.*/g, '')  // Remove ref numbers
+    .replace(/\s*\/\s*-\s*$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ── REVIEW TABLE ──
+let reviewFilterMode = 'all';
+let reviewSearchQuery = '';
+
+function renderParsedRows() {
+  document.getElementById('parsedSection').style.display = '';
+  refreshReviewTable();
+  refreshPTotals();
+}
+
+function refreshReviewTable() {
+  let rows = parsedRows.filter(r => {
+    if(reviewFilterMode === 'income') return r.type === 'income';
+    if(reviewFilterMode === 'expense') return r.type === 'expense';
+    if(reviewFilterMode === 'other') return r.cat === 'Other';
+    return true;
+  });
+  if(reviewSearchQuery) {
+    const q = reviewSearchQuery.toLowerCase();
+    rows = rows.filter(r => r.desc.toLowerCase().includes(q) || r.cat.toLowerCase().includes(q));
+  }
+  
+  const body = document.getElementById('parsedBody');
+  if(!body) return;
+  
+  body.innerHTML = rows.map((r, i) => {
+    const actualIdx = parsedRows.indexOf(r);
+    return `<tr id="prow-${actualIdx}" style="${r.selected ? 'background:var(--accent4)' : ''}">
+      <td><input type="checkbox" ${r.selected ? 'checked' : ''} onchange="toggleRowSelect(${actualIdx},this)" style="cursor:pointer"></td>
+      <td style="color:var(--text3);font-size:11px">${r.date?.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1') || '—'}</td>
+      <td>
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${r.desc}</div>
+        ${r.rawDesc && r.rawDesc !== r.desc ? `<div style="font-size:10px;color:var(--text3);margin-top:1px">${r.rawDesc.slice(0,50)}</div>` : ''}
+      </td>
+      <td style="font-family:var(--font-mono);font-weight:600;color:${r.type==='income'?'var(--green)':'var(--red)'}">
+        ${r.type==='income'?'+':'-'}${Math.round(r.amount).toLocaleString('en-LK')}
+      </td>
+      <td>
+        <select onchange="parsedRows[${actualIdx}].type=this.value;refreshReviewTable();refreshPTotals()" style="font-size:11px;padding:3px 6px;border-radius:4px;border:1px solid var(--border2);background:${r.type==='income'?'var(--green2)':'var(--red2)'};color:${r.type==='income'?'var(--green)':'var(--red)'}">
+          <option ${r.type==='expense'?'selected':''} value="expense">Expense</option>
+          <option ${r.type==='income'?'selected':''} value="income">Income</option>
+        </select>
+      </td>
+      <td>
+        <select onchange="parsedRows[${actualIdx}].cat=this.value" style="font-size:11px;padding:3px 6px">
+          ${CATS.map(c => `<option ${c===r.cat?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select onchange="parsedRows[${actualIdx}].month=this.value" style="font-size:11px;padding:3px 6px;width:70px">
+          ${MONTHS.map(m => `<option ${m===r.month?'selected':''}>${m.split(' ')[0]}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <button class="btn-danger" style="padding:3px 7px" onclick="parsedRows.splice(${actualIdx},1);renderParsedRows()">
+          <i class="ti ti-x" style="font-size:11px"></i>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  // Update bulk toolbar
+  const selected = parsedRows.filter(r => r.selected);
+  const toolbar = document.getElementById('bulkToolbar');
+  const sc = document.getElementById('selectedCount');
+  if(toolbar) toolbar.style.display = selected.length > 0 ? 'flex' : 'none';
+  if(sc) sc.textContent = selected.length;
+}
+
+window.reviewFilter = function(mode) {
+  reviewFilterMode = mode;
+  ['all','income','expense','uncategorised'].forEach(m => {
+    const btn = document.getElementById('rf-' + (m==='uncategorised'?'uncategorised':m));
+    if(btn) btn.style.background = m===mode ? 'var(--accent3)' : '';
+  });
+  const buttons = document.querySelectorAll('#parsedSection .btn-ghost');
+  refreshReviewTable();
+};
+
+window.reviewSearch = function() {
+  reviewSearchQuery = document.getElementById('reviewSearch').value;
+  refreshReviewTable();
+};
+
+window.toggleSelectAll = function(cb) {
+  parsedRows.forEach(r => r.selected = cb.checked);
+  refreshReviewTable();
+};
+
+window.toggleRowSelect = function(idx, cb) {
+  parsedRows[idx].selected = cb.checked;
+  const sel = parsedRows.filter(r => r.selected);
+  const allCb = document.getElementById('selectAllCheck');
+  if(allCb) allCb.checked = sel.length === parsedRows.length;
+  const toolbar = document.getElementById('bulkToolbar');
+  const sc = document.getElementById('selectedCount');
+  if(toolbar) toolbar.style.display = sel.length > 0 ? 'flex' : 'none';
+  if(sc) sc.textContent = sel.length;
+};
+
+window.selectAllRows = function() {
+  parsedRows.forEach(r => r.selected = true);
+  const cb = document.getElementById('selectAllCheck');
+  if(cb) cb.checked = true;
+  refreshReviewTable();
+};
+
+window.deleteSelectedRows = function() {
+  const before = parsedRows.length;
+  parsedRows = parsedRows.filter(r => !r.selected);
+  toast('Removed '+(before-parsedRows.length)+' rows','ok');
+  renderParsedRows();
+};
+
+window.applyBulkEdit = function() {
+  const cat = document.getElementById('bulkCat').value;
+  const type = document.getElementById('bulkType').value;
+  parsedRows.filter(r => r.selected).forEach(r => {
+    if(cat) r.cat = cat;
+    if(type) r.type = type;
+    r.selected = false;
+  });
+  toast('Applied to selected rows','ok');
+  refreshReviewTable();
+  refreshPTotals();
+};
+
+window.refreshPTotals = function() {
+  const inc = parsedRows.filter(r => r.type==='income').reduce((s,r) => s+r.amount, 0);
+  const exp = parsedRows.filter(r => r.type==='expense').reduce((s,r) => s+r.amount, 0);
+  const el2 = document.getElementById('parsedTotals');
+  if(el2) el2.innerHTML = `
+    <span style="color:var(--text3)">${parsedRows.length} transactions</span>
+    <span style="color:var(--text3)">Income: <strong style="color:var(--green)">+LKR ${Math.round(inc).toLocaleString()}</strong></span>
+    <span style="color:var(--text3)">Expenses: <strong style="color:var(--red)">-LKR ${Math.round(exp).toLocaleString()}</strong></span>
+    <span style="color:var(--text3)">Net: <strong style="color:${inc-exp>=0?'var(--green)':'var(--red)'}">${inc-exp>=0?'+':'-'}LKR ${Math.round(Math.abs(inc-exp)).toLocaleString()}</strong></span>
+  `;
+};
+
+
 window.parseStatement=async function(){
   const key=localStorage.getItem('fai_gemini')||'';
   if(!key){toast('Enter your Gemini API key in Settings first','err');gotoPage('settings');return;}
