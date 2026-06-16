@@ -2,78 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<base href="https://thiranvass.github.io/financeai/">
-
-<script>
-// Pre-configure Firebase - config injected at build time
-(function(){
-  var cfg = {
-  apiKey: "AIzaSyCUb-4r52Qhc9rfIx39gS2T3Mnzgs2Suz4",
-  authDomain: "financeai-thiran.firebaseapp.com",
-  projectId: "financeai-thiran",
-  storageBucket: "financeai-thiran.firebasestorage.app",
-  messagingSenderId: "281571581680",
-  appId: "1:281571581680:web:eb4c19d712d1e8a49eec35"
-};
-  localStorage.setItem('fai_fbcfg', JSON.stringify(cfg));
-})();
-</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FinanceAI — Personal Wealth Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.14.0/dist/tabler-icons.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp,query,orderBy}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-const cfg=JSON.parse(localStorage.getItem('fai_fbcfg')||'{}');
-if(cfg.apiKey){
-  const app=initializeApp(cfg);
-  window._FB={auth:getAuth(app),db:getFirestore(app),GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,collection,doc,setDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp,query,orderBy};
-  window._fbReady=true;document.dispatchEvent(new Event('fb-ready'));
-}
-</script>
 <style>
-/* AUTH */
-#auth-screen{position:fixed;inset:0;background:var(--bg,#0A0B0F);display:flex;align-items:center;justify-content:center;z-index:900}
-#auth-screen.hidden{display:none}
-.auth-card{background:#16171E;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px 44px;width:380px;text-align:center}
-.auth-logo{width:52px;height:52px;border-radius:14px;background:#6366F1;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-.auth-logo i{font-size:26px;color:#fff}
-.auth-title{font-family:'DM Sans',system-ui;font-size:22px;font-weight:600;color:#F0F1F7;margin-bottom:6px}
-.auth-sub{font-size:13px;color:#4F5068;margin-bottom:28px;line-height:1.6}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#1C1D27;color:#F0F1F7;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
-.google-btn:hover{border-color:#6366F1;background:rgba(99,102,241,.08)}
-.auth-note{font-size:11px;color:#4F5068;margin-top:16px;line-height:1.6}
-/* SETUP */
-#setup-screen{position:fixed;inset:0;background:var(--bg,#0A0B0F);display:flex;align-items:center;justify-content:center;z-index:800;overflow-y:auto}
-#setup-screen.hidden{display:none}
-.setup-card{background:#16171E;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px 36px;width:520px;margin:20px}
-.setup-title{font-family:'DM Sans',system-ui;font-size:18px;font-weight:600;color:#F0F1F7;margin-bottom:4px}
-.setup-sub{font-size:12px;color:#4F5068;margin-bottom:20px;line-height:1.6}
-.setup-step{background:#1C1D27;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.setup-step-n{font-size:10px;color:#818CF8;font-weight:500;margin-bottom:4px;letter-spacing:.06em}
-.setup-step-t{font-size:12.5px;font-weight:500;color:#F0F1F7;margin-bottom:3px}
-.setup-step-d{font-size:11.5px;color:#4F5068;line-height:1.6}
-.code-block{font-family:'JetBrains Mono',monospace;font-size:11px;background:#0A0B0F;border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:8px 12px;color:#818CF8;margin-top:6px;white-space:pre;overflow-x:auto;line-height:1.6}
-.setup-inp{background:#1C1D27;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#F0F1F7;font-size:12px;width:100%;outline:none;font-family:'JetBrains Mono',monospace;margin-top:6px}
-.setup-inp:focus{border-color:#6366F1}
-.setup-btn{background:#6366F1;color:#fff;border:none;padding:11px 22px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;width:100%;margin-top:12px;font-family:inherit}
-.setup-btn:hover{opacity:.9}
-.setup-link{color:#818CF8;text-decoration:none}
-.setup-link:hover{text-decoration:underline}
-/* SYNC */
-.sync-dot{width:6px;height:6px;border-radius:50%;background:#4F5068;flex-shrink:0;transition:background .3s}
-.sync-dot.synced{background:#10B981}
-.sync-dot.syncing{background:#F59E0B;animation:pulse .8s ease-in-out infinite}
-.sync-dot.error{background:#F43F5E}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-/* USER PANEL */
-.sb-avatar{width:30px;height:30px;border-radius:50%;background:rgba(99,102,241,.2);border:1px solid #6366F1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#818CF8;font-weight:500;flex-shrink:0;overflow:hidden}
-.sb-avatar img{width:100%;height:100%;object-fit:cover}
-</style>
 :root{
   --bg:#0A0B0F;--bg1:#111218;--bg2:#16171E;--bg3:#1C1D27;--bg4:#22232F;
   --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.10);
@@ -90,7 +25,7 @@ if(cfg.apiKey){
   --font-mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
-html,body{background:#0A0B0F;color:#F0F1F7;font-family:var(--font);font-size:13px;height:100%;overflow:hidden}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;height:100%;overflow:hidden}
 button,input,select,textarea{font-family:var(--font);font-size:13px}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
@@ -346,58 +281,6 @@ textarea{resize:vertical;min-height:90px;line-height:1.5}
 </style>
 </head>
 <body>
-<!-- AUTH SCREEN -->
-<div id="auth-screen" class="hidden">
-  <div class="auth-card">
-    <div class="auth-logo"><i class="ti ti-chart-dots"></i></div>
-    <div class="auth-title">FinanceAI</div>
-    <div class="auth-sub">Your personal wealth manager.<br>Sign in to save all data securely to the cloud.</div>
-    <button class="google-btn" onclick="signInGoogle()">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
-    <div class="auth-note">Your data is stored in your own Firebase project under your Google account. Nobody else can access it.</div>
-  </div>
-</div>
-
-<!-- SETUP SCREEN -->
-<div id="setup-screen">
-  <div class="setup-card">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <div style="width:32px;height:32px;border-radius:9px;background:#6366F1;display:flex;align-items:center;justify-content:center"><i class="ti ti-chart-dots" style="font-size:17px;color:#fff"></i></div>
-      <div class="setup-title">Connect Firebase — one-time setup</div>
-    </div>
-    <div class="setup-sub">FinanceAI needs a Firebase project to store your data permanently. Follow these steps (takes about 5 minutes, completely free).</div>
-    <div class="setup-step"><div class="setup-step-n">STEP 1</div><div class="setup-step-t">Create a Firebase project</div><div class="setup-step-d">Go to <a class="setup-link" href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Add project → name it "financeai" → disable Analytics → Create.</div></div>
-    <div class="setup-step"><div class="setup-step-n">STEP 2</div><div class="setup-step-t">Add a Web app &amp; copy config</div><div class="setup-step-d">Project settings (gear) → Your apps → Add app → Web → Register. Copy the firebaseConfig object shown. You'll paste the values below.</div></div>
-    <div class="setup-step"><div class="setup-step-n">STEP 3</div><div class="setup-step-t">Enable Google Sign-in</div><div class="setup-step-d">Authentication → Sign-in method → Google → Enable → Save. Add <strong style="color:#818CF8">localhost</strong> and your hosted domain to Authorised domains.</div></div>
-    <div class="setup-step"><div class="setup-step-n">STEP 4</div><div class="setup-step-t">Create Firestore database</div><div class="setup-step-d">Firestore Database → Create database → Production mode → Region: <strong style="color:#818CF8">asia-south1</strong> (closest to Sri Lanka) → Enable.</div></div>
-    <div class="setup-step"><div class="setup-step-n">STEP 5</div><div class="setup-step-t">Set security rules (copy exactly)</div>
-      <div class="code-block">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null
-                         &amp;&amp; request.auth.uid == userId;
-    }
-  }
-}</div>
-    </div>
-    <div class="setup-step"><div class="setup-step-n">STEP 6</div><div class="setup-step-t">Paste your Firebase config values here</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">API Key</div><input class="setup-inp" id="s-apiKey" placeholder="AIzaSy..."></div>
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">Auth Domain</div><input class="setup-inp" id="s-authDomain" placeholder="proj.firebaseapp.com"></div>
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">Project ID</div><input class="setup-inp" id="s-projectId" placeholder="your-project-id"></div>
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">Storage Bucket</div><input class="setup-inp" id="s-storageBucket" placeholder="proj.appspot.com"></div>
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">Messaging Sender ID</div><input class="setup-inp" id="s-messagingSenderId" placeholder="123456789"></div>
-        <div><div style="font-size:10px;color:#4F5068;margin-bottom:3px">App ID</div><input class="setup-inp" id="s-appId" placeholder="1:123:web:abc"></div>
-      </div>
-      <button class="setup-btn" onclick="saveSetupConfig()"><i class="ti ti-rocket"></i> Connect &amp; launch FinanceAI</button>
-      <div id="setup-err" style="color:#F43F5E;font-size:12px;margin-top:8px;display:none"></div>
-    </div>
-  </div>
-</div>
-
 <div id="app">
 
 <!-- ══════════ SIDEBAR ══════════ -->
@@ -435,17 +318,9 @@ service cloud.firestore {
       <span>Gemini AI</span>
       <div class="api-status" id="apiDot"></div>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:10.5px;color:var(--text3)">
-      <div class="sync-dot" id="syncDot"></div>
-      <span id="syncLabel">Not connected</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r);cursor:pointer" onclick="doSignOut()" onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
-      <div class="sb-avatar" id="userAvatar"><i class="ti ti-user" style="font-size:14px"></i></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="userName">—</div>
-        <div style="font-size:10px;color:var(--text3)" id="userEmail">Sign out</div>
-      </div>
-      <i class="ti ti-logout" style="font-size:13px;color:var(--text3)"></i>
+    <div class="sb-user">
+      <div class="sb-avatar">YO</div>
+      <span class="sb-username">Your finances</span>
     </div>
   </div>
 </div>
@@ -1425,18 +1300,19 @@ document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>
 // ── TOASTS ──
 function toast(msg,type='ok'){
   const wrap=document.getElementById('toastWrap');
-  const t=document.createElement('div');t.className=`toast toast-${type}`;
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
   const icons={ok:'ti-circle-check',err:'ti-alert-circle',info:'ti-info-circle'};
   t.innerHTML=`<i class="ti ${icons[type]||'ti-info-circle'}" style="font-size:15px"></i> ${msg}`;
   wrap.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3500);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
 }
 function showInlineToast(id,msg,type){
   const el=document.getElementById(id);if(!el)return;
   if(!msg){el.innerHTML='';return;}
   const icons={ok:'ti-circle-check',err:'ti-alert-circle',info:'ti-info-circle'};
   const colors={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
-  el.innerHTML=`<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:${colors[type]}"><i class="ti ${icons[type]}" style="font-size:14px"></i>${msg}</span>`;
+  el.innerHTML=`<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:${colors[type]||'var(--text2)'}"><i class="ti ${icons[type]||'ti-info-circle'}" style="font-size:14px"></i>${msg}</span>`;
 }
 
 // ── NAVIGATION CLICKS ──
@@ -1444,210 +1320,10 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn=>{
   btn.addEventListener('click',()=>gotoPage(btn.dataset.page));
 });
 
-// ══════════════════════════════════
-//  FIREBASE CLOUD BACKEND
-// ══════════════════════════════════
-let _FB=null;
-let _user=null;
-let _unsubs=[];
-
-function setSyncing(state){
-  const dot=document.getElementById('syncDot');
-  const lbl=document.getElementById('syncLabel');
-  if(!dot||!lbl)return;
-  dot.className='sync-dot '+state;
-  lbl.textContent={syncing:'Saving to cloud…',synced:'All data saved',error:'Sync error — check connection'}[state]||'';
-}
-
-function userCol(c){return _FB.collection(_FB.db,'users',_user.uid,c);}
-function userDoc(c,d){return _FB.doc(_FB.db,'users',_user.uid,c,d);}
-
-async function fbSave(col,id,data){
-  setSyncing('syncing');
-  try{await _FB.setDoc(userDoc(col,id),{...data,_updated:_FB.serverTimestamp()});setSyncing('synced');}
-  catch(e){setSyncing('error');toast('Save failed: '+e.message,'err');throw e;}
-}
-async function fbDelete(col,id){
-  setSyncing('syncing');
-  try{await _FB.deleteDoc(userDoc(col,id));setSyncing('synced');}
-  catch(e){setSyncing('error');toast('Delete failed: '+e.message,'err');throw e;}
-}
-
-function listenAll(){
-  _unsubs.forEach(u=>u());_unsubs=[];
-  ['txns','cards','loans','investments'].forEach(col=>{
-    const q=_FB.query(userCol(col),_FB.orderBy('_updated','asc'));
-    _unsubs.push(_FB.onSnapshot(q,snap=>{
-      DB[col]=snap.docs.map(d=>({...d.data(),id:d.id}));
-      renderCurrentPage();updateNavVals();
-    },e=>{setSyncing('error');console.error(col,e);}));
-  });
-  _unsubs.push(_FB.onSnapshot(userDoc('config','budgets'),snap=>{
-    if(snap.exists())DB.budgets={...BUDGET_DEFAULTS,...snap.data()};
-    renderCurrentPage();
-  }));
-}
-
-async function signInGoogle(){
-  try{
-    const p=new _FB.GoogleAuthProvider();
-    await _FB.signInWithPopup(_FB.auth,p);
-  }catch(e){toast('Sign-in failed: '+e.message,'err');}
-}
-
-async function doSignOut(){
-  if(!confirm('Sign out? All your data stays safely in the cloud.'))return;
-  _unsubs.forEach(u=>u());_unsubs=[];
-  await _FB.signOut(_FB.auth);
-  DB={txns:[],cards:[],loans:[],investments:[],budgets:{...BUDGET_DEFAULTS}};
-  document.getElementById('auth-screen').classList.remove('hidden');
-}
-
-function startAuth(){
-  _FB.onAuthStateChanged(_FB.auth,user=>{
-    if(user){
-      _user=user;
-      document.getElementById('auth-screen').classList.add('hidden');
-      document.getElementById('setup-screen').classList.add('hidden');
-      // user info
-      const av=document.getElementById('userAvatar');
-      if(user.photoURL)av.innerHTML=`<img src="${user.photoURL}" alt="">`;
-      else av.textContent=(user.displayName||user.email||'U').charAt(0).toUpperCase();
-      document.getElementById('userName').textContent=user.displayName||'User';
-      document.getElementById('userEmail').textContent=user.email||'';
-      const sk=localStorage.getItem('fai_gemini')||'';
-      if(sk){document.getElementById('apiKeyInput').value=sk;document.getElementById('apiDot').classList.add('ok');}
-      setSyncing('synced');
-      listenAll();
-      buildMonthTabs();
-      gotoPage('dashboard');
-    } else {
-      _user=null;
-      document.getElementById('auth-screen').classList.remove('hidden');
-    }
-  });
-}
-
-// Override save/delete functions to use Firestore
-const _origSaveBudgets=window.saveBudgets;
-window.saveBudgets=async function(){
-  const data={...BUDGET_DEFAULTS};
-  CATS.forEach(c=>{const el=document.getElementById('bg_'+c.replace(/[^a-z]/gi,'_'));if(el)data[c]=parseFloat(el.value)||0;});
-  await fbSave('config','budgets',data);toast('Budgets saved to cloud','ok');
-};
-window.saveApiKey=function(){
-  const k=document.getElementById('apiKeyInput').value.trim();
-  if(!k){toast('Enter your Gemini API key','err');return;}
-  localStorage.setItem('fai_gemini',k);
-  document.getElementById('apiDot').classList.add('ok');
-  toast('Gemini key saved','ok');
-};
-window.clearAll=async function(){
-  if(!confirm('Delete ALL cloud data permanently? Cannot be undone.'))return;
-  for(const col of['txns','cards','loans','investments']){
-    const snap=await _FB.query(userCol(col));
-    // delete docs one by one (small data for personal app)
-    const docs=await(await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')).getDocs(userCol(col));
-    const batch=_FB.writeBatch(_FB.db);docs.forEach(d=>batch.delete(d.ref));await batch.commit();
-  }
-  await _FB.deleteDoc(userDoc('config','budgets'));
-  toast('All cloud data deleted','ok');
-};
-window.exportCSV=function(){
-  const rows=[['Date','Description','Amount','Type','Category','Month'],...DB.txns.map(t=>[t.date||'',t.desc||'',t.amount,t.type,t.cat||'',t.month||''])];
-  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='financeai_export.csv';a.click();
-  toast('CSV exported','ok');
-};
-// Override add/delete functions
-window.saveCard=async function(){
-  const n=document.getElementById('cc-name').value.trim();const num=document.getElementById('cc-num').value.trim();
-  const limit=parseFloat(document.getElementById('cc-limit').value)||0;const used=parseFloat(document.getElementById('cc-used').value)||0;
-  const rate=parseFloat(document.getElementById('cc-rate').value)||0;const due=parseInt(document.getElementById('cc-due').value)||15;
-  if(!n||!limit){toast('Enter card name and limit','err');return;}
-  const id=uid();await fbSave('cards',id,{id,name:n,num:num||'0000',limit,used,rate,due,c1:document.getElementById('cc-c1').value,c2:document.getElementById('cc-c2').value});
-  closeModal('addCard');toast('Card saved to cloud','ok');['cc-name','cc-num','cc-limit','cc-used','cc-rate','cc-due'].forEach(i=>document.getElementById(i).value='');
-};
-window.deleteCard=async function(id){if(confirm('Remove this card?')){await fbDelete('cards',id);toast('Card removed','ok');}};
-window.saveLoan=async function(){
-  const n=document.getElementById('ln-name').value.trim();const bank=document.getElementById('ln-bank').value.trim();
-  const orig=parseFloat(document.getElementById('ln-orig').value)||0;const bal=parseFloat(document.getElementById('ln-bal').value)||0;
-  const rate=parseFloat(document.getElementById('ln-rate').value)||0;const emi=parseFloat(document.getElementById('ln-emi').value)||0;
-  const rem=parseInt(document.getElementById('ln-rem').value)||0;const type=document.getElementById('ln-type').value;
-  if(!n||!orig){toast('Enter loan name and amount','err');return;}
-  const id=uid();await fbSave('loans',id,{id,name:n,bank,orig,bal,rate,emi,rem,type});closeModal('addLoan');toast('Loan saved to cloud','ok');
-};
-window.deleteLoan=async function(id){if(confirm('Remove this loan?')){await fbDelete('loans',id);toast('Loan removed','ok');}};
-window.saveInv=async function(){
-  const n=document.getElementById('inv-name').value.trim();const type=document.getElementById('inv-type').value;
-  const cost=parseFloat(document.getElementById('inv-cost').value)||0;const val=parseFloat(document.getElementById('inv-val').value)||cost;
-  const ret=parseFloat(document.getElementById('inv-ret').value)||0;const date=document.getElementById('inv-date').value;
-  if(!n||!cost){toast('Enter name and amount','err');return;}
-  const id=uid();await fbSave('investments',id,{id,name:n,type,cost,val,ret,date});closeModal('addInv');toast('Investment saved to cloud','ok');
-};
-window.deleteInv=async function(id){if(confirm('Remove this investment?')){await fbDelete('investments',id);toast('Investment removed','ok');}};
-window.saveManualTxn=async function(){
-  const d=document.getElementById('mt-date').value;
-  const desc=document.getElementById('mt-desc').value.trim();
-  const amt=parseFloat(document.getElementById('mt-amount').value)||0;
-  const type=document.getElementById('mt-type').value;
-  const cat=document.getElementById('mt-cat').value;
-  const month=document.getElementById('mt-month').value;
-  if(!desc||!amt){toast('Enter description and amount','err');return;}
-  const id=uid();await fbSave('txns',id,{id,date:d||new Date().toISOString().slice(0,10),desc,amount:amt,type,cat,month});closeModal('addTxn');toast('Transaction saved to cloud','ok');
-};
-window.deleteTxn=async function(id){await fbDelete('txns',id);toast('Transaction removed','ok');};
-window.confirmImport=async function(){
-  if(!parsedRows.length){toast('No rows to import','err');return;}
-  const btn=document.querySelector('#parsedSection .btn-primary');if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Saving to cloud…';}
-  try{
-    const batch=_FB.writeBatch(_FB.db);
-    parsedRows.forEach(r=>{batch.set(userDoc('txns',r.id||uid()),{id:r.id,date:r.date,desc:r.description||r.desc,amount:r.amount,type:r.type,cat:r.category||r.cat,month:r.month,_updated:_FB.serverTimestamp()});});
-    await batch.commit();
-    toast(parsedRows.length+' transactions saved to cloud','ok');
-    parsedRows=[];document.getElementById('parsedSection').style.display='none';document.getElementById('stmtText').value='';showInlineToast('parseToast','','');
-  }catch(e){toast('Save failed: '+e.message,'err');}
-  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-cloud-upload"></i> Save to cloud';}
-};
-
-// ── SETUP CONFIG SCREEN ──
-function saveSetupConfig(){
-  const fields=['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
-  const cfg={};
-  for(const f of fields){
-    const v=document.getElementById('s-'+f)?.value.trim();
-    if(!v){document.getElementById('setup-err').textContent='Please fill in all 6 fields.';document.getElementById('setup-err').style.display='';return;}
-    cfg[f]=v;
-  }
-  localStorage.setItem('fai_fbcfg',JSON.stringify(cfg));
-  document.getElementById('setup-err').style.display='none';
-  toast('Config saved! Reloading…','ok');
-  setTimeout(()=>location.reload(),1200);
-}
-
-// ── BOOT ──
-(function boot(){
-  const cfg=JSON.parse(localStorage.getItem('fai_fbcfg')||'{}');
-  if(!cfg.apiKey){
-    // show setup
-    document.getElementById('setup-screen').classList.remove('hidden');
-    document.getElementById('auth-screen').classList.add('hidden');
-    buildMonthTabs();
-    return;
-  }
-  function waitFB(){
-    return new Promise(res=>{
-      if(window._fbReady){res(window._FB);return;}
-      document.addEventListener('fb-ready',()=>res(window._FB),{once:true});
-    });
-  }
-  waitFB().then(fb=>{
-    _FB=fb;
-    document.getElementById('setup-screen').classList.add('hidden');
-    document.getElementById('auth-screen').classList.remove('hidden');
-    startAuth();
-  });
-})();
+// ── INIT ──
+dbLoad();
+buildMonthTabs();
+gotoPage('dashboard');
 </script>
 </body>
 </html>
